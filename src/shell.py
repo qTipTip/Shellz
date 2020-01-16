@@ -26,17 +26,17 @@ class Shell(object):
 
 if __name__ == '__main__':
     C = Ellipse(2, 1)
-    H = HelicoSpiral()
+    H = HelicoSpiral(A=1, beta=100, alpha=30)
 
     S = Shell(H, C)
 
-    theta = np.linspace(0, 4 * np.pi, 100)
-    s = np.linspace(0, 2 * np.pi, 20)
+    theta = np.linspace(0, 2 * np.pi, 100)
+    s = np.linspace(0, 2 * np.pi, 40)
 
     xyz = S(theta, s)
 
     fig = plt.figure()
     axs = Axes3D(fig)
-    axs.plot_surface(*xyz)
+    axs.plot_surface(*xyz, cmap=plt.cm.viridis)
     axs.plot(*H(theta))
     plt.show()
