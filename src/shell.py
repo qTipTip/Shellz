@@ -12,6 +12,7 @@ class Shell(object):
 
     def __init__(self, helico_spiral, generating_curve):
         """
+        Initialize a shell by specifying the generating curve and the helico spiral.
 
         :param helico_spiral:
         :param generating_curve:
