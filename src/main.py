@@ -8,21 +8,22 @@ bl_info = {
 
 
 def register():
-    print("Shellz is now running")
-    bpy.utils.register_class(Shellz)
+    bpy.utils.register_class(AddShell)
 
 
 def unregister():
-    print("Shellz is now disabled")
-    bpy.utils.unregister_class(Shellz)
+    bpy.utils.unregister_class(AddShell)
 
 
-class Shellz(bpy.types.Operator):
+class AddShell(bpy.types.Operator):
     """
-    Shellz tooltip
+    Adds a shell based on the specified parameters.
     """
+    bl_idname = 'object.add_shell'
+    bl_label = "Adds a shell-object to the viewport"
+    bl_options = {'Register', 'UNDO'}
 
-    def execute(self, **kwargs):
+    def execute(self, context):
         """
         This is run upon calling the operator
         """
