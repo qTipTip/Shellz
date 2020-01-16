@@ -33,11 +33,11 @@ class HelicoSpiral(object):
         cot = float(sp.cot(alpha))
 
         h = np.zeros((3, len(theta)))
-        h[0] = A * np.sin(beta) * np.cos(theta) * np.exp(theta * cot)
-        h[1] = A * np.sin(beta) * np.sin(theta) * np.exp(theta * cot)
-        h[2] = -A * np.cos(beta) * np.exp(theta * cot)
+        h[0] = np.sin(beta) * np.cos(theta) * np.exp(theta * cot)
+        h[1] = np.sin(beta) * np.sin(theta) * np.exp(theta * cot)
+        h[2] = -np.cos(beta) * np.exp(theta * cot)
 
-        return h
+        return A * h
 
 
 if __name__ == '__main__':
