@@ -10,7 +10,7 @@ class GeneratingCurve(object):
 
 class Ellipse(GeneratingCurve):
 
-    def __init__(self, a=1, b=1, alpha=0.1):
+    def __init__(self, a=1, b=1, alpha=30):
         """
         Initializes an elliptical generating curve with semi-axes a and b.
 
@@ -59,14 +59,14 @@ class Ellipse(GeneratingCurve):
         assert np.min(s) >= 0 and np.max(s) <= 2 * np.pi, "The parameter s must lie in the interval [0, 2*pi]"
 
         a, b = self.a, self.b
-        return np.sqrt((np.cos(s) / a) ** 2 + (np.sin(s) / b) ** 2)
+        return 1 / np.sqrt((np.cos(s) / a) ** 2 + (np.sin(s) / b) ** 2)
 
 
 if __name__ == '__main__':
     C = Ellipse()
 
-    theta = np.linspace(0, 10 * np.pi, 20)
-    s = np.linspace(0, 2 * np.pi, 10)
+    theta = np.linspace(0, 10 * np.pi, 200)
+    s = np.linspace(0, 2 * np.pi, 100)
 
     xyz = C(theta, s)
 
