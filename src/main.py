@@ -88,8 +88,6 @@ def blender_import(context: bpy.context, vertices, faces):
     blender_object = bpy.data.objects.new("Shell", mesh)
     blender_object.location = bpy.context.scene.cursor.location
 
-    print(vertices, faces)
-
     bpy.context.collection.objects.link(blender_object)
     mesh.from_pydata(vertices, [], faces)
     # mesh.update(calc_edges=True)
