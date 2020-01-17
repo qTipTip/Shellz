@@ -22,7 +22,7 @@ class AddShell(bpy.types.Operator):
     """
     bl_idname = 'object.add_shell'
     bl_label = "Adds a shell-object to the viewport"
-    bl_options = {'Register', 'UNDO'}
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         """
