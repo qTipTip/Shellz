@@ -38,8 +38,8 @@ class AddShell(bpy.types.Operator):
         C = Ellipse()
         S = Shell(H, C)
 
-        theta = np.linspace(0, 2 * np.pi, 5)
-        s = np.linspace(0, 2 * np.pi, 10)
+        theta = np.linspace(0, 2 * np.pi, 40)
+        s = np.linspace(0, 2 * np.pi, 40)
         xyz = S(theta, s)
         vertices, faces = create_mesh(xyz)
 
@@ -88,9 +88,11 @@ def blender_import(context: bpy.context, vertices, faces):
     blender_object = bpy.data.objects.new("Shell", mesh)
     blender_object.location = bpy.context.scene.cursor.location
 
+    print(vertices, faces)
+
     bpy.context.collection.objects.link(blender_object)
     mesh.from_pydata(vertices, [], faces)
-    mesh.update(calc_edges=True)
+    # mesh.update(calc_edges=True)
 
 
 class GeneratingCurve(object):

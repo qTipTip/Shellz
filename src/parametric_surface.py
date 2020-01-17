@@ -151,8 +151,9 @@ mesh = bpy.data.meshes.new(surface.name)
 blender_object = bpy.data.objects.new(surface.name, mesh)
 
 blender_object.location = bpy.context.scene.cursor.location
-bpy.context.scene.collection.link(blender_object)
+bpy.context.collection.objects.link(blender_object)
 
 vertices, faces = surface.generate_mesh_data()
+print(vertices, faces)
 mesh.from_pydata(vertices, [], faces)
 mesh.update(calc_edges=True)
