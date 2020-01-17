@@ -1,4 +1,5 @@
 import bpy
+import bmesh
 import numpy as np
 
 bl_info = {
@@ -6,6 +7,10 @@ bl_info = {
     "blender": (2, 80, 0),
     "category": "object"
 }
+
+
+def cotan(x):
+    return 1 / np.tan(x)
 
 
 def register():
@@ -36,9 +41,9 @@ class AddShell(bpy.types.Operator):
         theta = np.linspace(0, 2 * np.pi, 5)
         s = np.linspace(0, 2 * np.pi, 10)
         xyz = S(theta, s)
-        faces = create_mesh(xyz)
+        vertices, faces = create_mesh(xyz)
 
-        blender_import(context, xyz, faces)
+        blender_import(context, vertices, faces)
 
         return {'FINISHED'}
 
@@ -53,6 +58,11 @@ def create_mesh(xyz):
     """
     _, m, n = xyz.shape
 
+    # compute vertices
+    vertices = []
+    for i in range(m):
+        for j in range(n):
+            vertices.append(tuple(xyz[:, i, j]))
     # compute faces
     counter = 0
     faces = []
@@ -70,13 +80,17 @@ def create_mesh(xyz):
         else:
             counter = 0
 
-    return faces
+    return vertices, faces
 
 
-def blender_import(context: bpy.context, xyz, faces):
+def blender_import(context: bpy.context, vertices, faces):
     mesh = bpy.data.meshes.new("Shell")
-    blender_object = bpy.data.objects.new(mesh, "Shell")
-    blender_object.location = context.scene.cursor_location
+    blender_object = bpy.data.objects.new("Shell", mesh)
+    blender_object.location = bpy.context.scene.cursor.location
+
+    bpy.context.collection.objects.link(blender_object)
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update(calc_edges=True)
 
 
 class GeneratingCurve(object):
@@ -124,7 +138,7 @@ class Ellipse(GeneratingCurve):
 
         cos_theta = np.cos(theta)
         sin_theta = np.sin(theta)
-        cot = cot(self.alpha)
+        cot = cotan(self.alpha)
 
         x = cos_s * cos_theta * r * np.exp(theta * cot)
         y = cos_s * sin_theta * r * np.exp(theta * cot)
@@ -184,7 +198,7 @@ class HelicoSpiral(object):
         beta = self.params['beta']
         alpha = self.params['alpha']
 
-        cot = cot(alpha)
+        cot = cotan(alpha)
 
         h = np.zeros((3, len(theta)))
         h[0] = np.sin(beta) * np.cos(theta) * np.exp(theta * cot)
