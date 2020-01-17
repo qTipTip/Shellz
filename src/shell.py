@@ -1,29 +1,11 @@
 from mpl_toolkits.mplot3d import Axes3D
 
-from src.generating_curve import Ellipse
-from src.helico_spiral import HelicoSpiral
+from src import Ellipse, HelicoSpiral
 
 import numpy as np
-import sympy as sp
 import matplotlib.pyplot as plt
 
-
-class Shell(object):
-
-    def __init__(self, helico_spiral, generating_curve):
-        """
-        Initialize a shell by specifying the generating curve and the helico spiral.
-
-        :param helico_spiral:
-        :param generating_curve:
-        """
-
-        self.H = helico_spiral
-        self.C = generating_curve
-
-    def __call__(self, theta, s):
-        return self.H(theta)[:, np.newaxis, :] + self.C(theta, s)
-
+from src.main import Shell
 
 if __name__ == '__main__':
     C = Ellipse(2, 1)
