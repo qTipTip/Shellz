@@ -1,5 +1,3 @@
-import sympy as sp
-
 import bpy
 import numpy as np
 
@@ -45,10 +43,6 @@ class AddShell(bpy.types.Operator):
         return {'FINISHED'}
 
 
-if __name__ == '__main__':
-    register()
-
-
 def create_mesh(xyz):
     """
     Converts the data given in the xyz array of shape (3, m, n) to a format
@@ -89,6 +83,10 @@ class GeneratingCurve(object):
     pass
 
 
+def cot(alpha):
+    return 1 / np.tan(alpha)
+
+
 class Ellipse(GeneratingCurve):
 
     def __init__(self, a=1, b=1, alpha=30):
@@ -126,7 +124,7 @@ class Ellipse(GeneratingCurve):
 
         cos_theta = np.cos(theta)
         sin_theta = np.sin(theta)
-        cot = float(sp.cot(self.alpha))
+        cot = cot(self.alpha)
 
         x = cos_s * cos_theta * r * np.exp(theta * cot)
         y = cos_s * sin_theta * r * np.exp(theta * cot)
@@ -186,7 +184,7 @@ class HelicoSpiral(object):
         beta = self.params['beta']
         alpha = self.params['alpha']
 
-        cot = float(sp.cot(alpha))
+        cot = cot(alpha)
 
         h = np.zeros((3, len(theta)))
         h[0] = np.sin(beta) * np.cos(theta) * np.exp(theta * cot)
@@ -194,3 +192,7 @@ class HelicoSpiral(object):
         h[2] = -np.cos(beta) * np.exp(theta * cot)
 
         return A * h
+
+
+if __name__ == '__main__':
+    register()
