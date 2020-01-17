@@ -1,6 +1,6 @@
-# Shellz
+# Shellz [Work in progress]
 
-A Blender addon for parametric seashell models.
+A Blender addon for parametric seashell models. Currently not in a working state.
 
 ## Todo:
 
