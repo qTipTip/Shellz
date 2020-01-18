@@ -78,6 +78,31 @@ class AddShell(bpy.types.Operator):
         default=0
     )
 
+    # Properties: Nodules
+    N: bpy.props.IntProperty(
+        name="N",
+        default=0,
+        min=0
+    )
+    P: bpy.props.FloatProperty(
+        name="P",
+        default=0,
+        min=0,
+        max=2 * np.pi
+    )
+    W_1: bpy.props.FloatProperty(
+        name="W_1",
+        default=0
+    )
+    W_2: bpy.props.FloatProperty(
+        name="W_w",
+        default=0
+    )
+    L: bpy.props.FloatProperty(
+        name="L",
+        default=0
+    )
+
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
 
@@ -176,7 +201,7 @@ def cot(alpha):
 
 class Ellipse(GeneratingCurve):
 
-    def __init__(self, a=1, b=1, A=1, alpha=30, beta=30, omega=0, phi=0, mu=0):
+    def __init__(self, a=1, b=1, A=1, alpha=30, beta=30, omega=0, phi=0, mu=0, L=0, N=0, W_1=0, W_2=0, P=0):
         """
         Initializes an elliptical generating curve with semi-axes a and b.
 
@@ -192,6 +217,11 @@ class Ellipse(GeneratingCurve):
         self.omega = omega
         self.phi = phi
         self.mu = mu
+        self.L = L
+        self.N = N
+        self.W_1 = W_1
+        self.W_2 = W_2
+        self.P = P
 
     def __call__(self, theta, s):
         """
@@ -205,7 +235,7 @@ class Ellipse(GeneratingCurve):
 
         theta, s = np.meshgrid(theta, s)
 
-        r = self._radius(s)
+        r = self._radius(s) + self._nodules()
         theta = np.array(theta)
 
         cos_s = np.cos(s + self.phi)
@@ -233,6 +263,13 @@ class Ellipse(GeneratingCurve):
 
         a, b = self.a, self.b
         return 1 / np.sqrt((np.cos(s) / a) ** 2 + (np.sin(s) / b) ** 2)
+
+    def _nodules(self, s, theta):
+        if self.W_1 == 0 or self.W_2 == 0 or self.N == 0:
+            return 0
+        else:
+            l_theta = 2 * np.pi / self.N * (self.N * theta / (2 * np.pi) - int(self.N * theta / 2 * np.pi))
+            return self.L * np.exp(-((2 * (s - self.P) / self.W_1) ** 2 + (2 * l_theta / self.W_2) ** 2))
 
 
 class Shell(object):
