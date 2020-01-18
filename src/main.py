@@ -1,7 +1,7 @@
 import bpy
 
 import numpy as np
-from PIL.Image import Image
+import PIL.Image
 from mathutils import Vector
 
 bl_info = {
@@ -342,7 +342,7 @@ class HelicoSpiral(object):
         return A * h
 
 
-def generate_texture(rho=0.001, kappa=0, mu=0.01, rho_0=0.001, sigma=0.015, nu=0, D_a=0.002, D_s=0.4, N=10, M=5):
+def generate_texture(rho, kappa, mu, rho_0, sigma, nu, D_a, D_s, N, M):
     t_values, dt = np.linspace(0, 1, N, retstep=True)
     x_values, dx = np.linspace(0, 1, M, retstep=True)
 
@@ -369,15 +369,18 @@ def generate_texture(rho=0.001, kappa=0, mu=0.01, rho_0=0.001, sigma=0.015, nu=0
         a[i + 1] = a[i] + dt * da_dt
         s[i + 1] = s[i] + dt * ds_dt
 
-    return a / np.linalg.norm(a)
+    return a / np.max(a, axis=(0, 1))
 
 
 if __name__ == '__main__':
     register()
 
-    texture_map = generate_texture(rho=0.01, rho_0=0.001, mu=0.01, D_a=0.002, sigma=0.015, nu=0, D_s=0.4, kappa=0,
-                                   N=1000,
-                                   M=1000)
+    texture_map = generate_texture(rho=0.1, rho_0=0.005, mu=0.1, D_a=0.004, sigma=0.012, nu=0, D_s=0.0, kappa=1,
+                                   N=100,
+                                   M=100)
+    import matplotlib.pyplot as plt
 
-    img = Image.fromarray(np.uint8(texture_map) * 255)
+    plt.imshow(texture_map)
+    map = np.uint8(texture_map * 255)
+    img = PIL.Image.fromarray(map)
     img.save('test.png')
