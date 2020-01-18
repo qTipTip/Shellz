@@ -39,12 +39,8 @@ class AddShell(bpy.types.Operator):
         name="max(theta)",
         default=360
     )
-    thetaResolution: bpy.props.IntProperty(
-        name="n_theta",
-        default=40
-    )
-    sResolution: bpy.props.IntProperty(
-        name="n_s",
+    resolution: bpy.props.IntProperty(
+        name="resolution",
         default=40
     )
     alpha: bpy.props.FloatProperty(
@@ -76,8 +72,8 @@ class AddShell(bpy.types.Operator):
         C = Ellipse(a=1, b=1, alpha=np.deg2rad(self.alpha))
         S = Shell(H, C)
 
-        theta = np.linspace(np.deg2rad(self.thetaMin), np.deg2rad(self.thetaMax), self.thetaResolution)
-        s = np.linspace(0, 2 * np.pi, self.sResolution)
+        theta = np.linspace(np.deg2rad(self.thetaMin), np.deg2rad(self.thetaMax), self.resolution)
+        s = np.linspace(0, 2 * np.pi, self.resolution)
         xyz = S(theta, s)
         vertices, faces = create_mesh(xyz)
 
