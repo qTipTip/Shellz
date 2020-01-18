@@ -1,7 +1,7 @@
 import bpy
-import bmesh
-import numpy as np
 
+import numpy as np
+from PIL.Image import Image
 from mathutils import Vector
 
 bl_info = {
@@ -186,7 +186,7 @@ def blender_import(context: bpy.context, vertices, faces):
 
     bpy.context.collection.objects.link(blender_object)
     mesh.from_pydata(vertices, [], faces)
-    # mesh.update(calc_edges=True)
+    mesh.update(calc_edges=True)
 
     normalize_object_size(blender_object)
 
@@ -342,5 +342,42 @@ class HelicoSpiral(object):
         return A * h
 
 
+def generate_texture(rho=0.001, kappa=0, mu=0.01, rho_0=0.001, sigma=0.015, nu=0, D_a=0.002, D_s=0.4, N=10, M=5):
+    t_values, dt = np.linspace(0, 1, N, retstep=True)
+    x_values, dx = np.linspace(0, 1, M, retstep=True)
+
+    s = np.zeros((N, M))
+    a = np.zeros((N, M))
+
+    rho_array = np.random.normal(rho, scale=0.025, size=(N, M))
+    s[0] = np.zeros(M)
+    a[0] = np.zeros(M)
+
+    def rhs(a_prev, s_prev):
+        da_ddx = np.gradient(np.gradient(a_prev))
+        ds_ddx = np.gradient(np.gradient(s_prev))
+
+        da_dt = rho * s_prev * (a_prev ** 2 / (1 + kappa * a_prev ** 2) + rho_0) - mu * a_prev + D_a * da_ddx
+        ds_dt = sigma - rho * s_prev * (a_prev ** 2 / (1 + kappa * a_prev ** 2) + rho_0) - nu * s_prev + D_s * ds_ddx
+
+        return da_dt, ds_dt
+
+    for i in range(0, N - 1):
+        rho = rho_array[i]
+        da_dt, ds_dt = rhs(a[i], s[i])
+
+        a[i + 1] = a[i] + dt * da_dt
+        s[i + 1] = s[i] + dt * ds_dt
+
+    return a / np.linalg.norm(a)
+
+
 if __name__ == '__main__':
     register()
+
+    texture_map = generate_texture(rho=0.01, rho_0=0.001, mu=0.01, D_a=0.002, sigma=0.015, nu=0, D_s=0.4, kappa=0,
+                                   N=1000,
+                                   M=1000)
+
+    img = Image.fromarray(np.uint8(texture_map) * 255)
+    img.save('test.png')
