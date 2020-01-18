@@ -47,7 +47,6 @@ class AddShell(bpy.types.Operator):
     thetaMin: bpy.props.FloatProperty(
         name="min(theta)",
         default=0.0,
-        min=0
     )
     thetaMax: bpy.props.FloatProperty(
         name="max(theta)",
@@ -65,6 +64,15 @@ class AddShell(bpy.types.Operator):
     )
 
     # Properties: Generating Curve
+
+    sMin: bpy.props.FloatProperty(
+        name="min(s)",
+        default=0
+    )
+    sMax: bpy.props.FloatProperty(
+        name="max(s)",
+        default=360
+    )
     omega: bpy.props.FloatProperty(
         name="omega",
         default=0
@@ -88,14 +96,14 @@ class AddShell(bpy.types.Operator):
         name="P",
         default=0,
         min=0,
-        max=2 * np.pi
+        max=360
     )
     W_1: bpy.props.FloatProperty(
         name="W_1",
         default=0
     )
     W_2: bpy.props.FloatProperty(
-        name="W_w",
+        name="W_2",
         default=0
     )
     L: bpy.props.FloatProperty(
@@ -114,11 +122,11 @@ class AddShell(bpy.types.Operator):
         H = HelicoSpiral(alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta), A=self.A)
         C = Ellipse(a=1, b=1, A=self.A, alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta),
                     omega=np.deg2rad(self.omega), phi=np.deg2rad(self.phi),
-                    mu=np.deg2rad(self.mu), L=self.L, P=self.P, N=self.N, W_1=self.W_1, W_2=self.W_2)
+                    mu=np.deg2rad(self.mu), L=self.L, P=np.deg2rad(self.P), N=self.N, W_1=self.W_1, W_2=self.W_2)
         S = Shell(H, C)
 
         theta = np.linspace(np.deg2rad(self.thetaMin), np.deg2rad(self.thetaMax), self.resolution)
-        s = np.linspace(0, 2 * np.pi, self.resolution)
+        s = np.linspace(np.deg2rad(self.sMin), np.deg2rad(self.sMax), self.resolution)
         xyz = S(theta, s)
         vertices, faces = create_mesh(xyz)
 
@@ -235,7 +243,8 @@ class Ellipse(GeneratingCurve):
 
         theta, s = np.meshgrid(theta, s)
 
-        r = self._radius(s) + self._nodules()
+        r = self._radius(s) + self._nodules(s, theta)
+        print(self._radius(s).shape, self._nodules(s, theta).shape)
         theta = np.array(theta)
 
         cos_s = np.cos(s + self.phi)
@@ -259,16 +268,16 @@ class Ellipse(GeneratingCurve):
     def _radius(self, s):
         s = np.array(s)
 
-        assert np.min(s) >= 0 and np.max(s) <= 2 * np.pi, "The parameter s must lie in the interval [0, 2*pi]"
+        # assert np.min(s) >= 0 and np.max(s) <= 2 * np.pi, "The parameter s must lie in the interval [0, 2*pi]"
 
         a, b = self.a, self.b
         return 1 / np.sqrt((np.cos(s) / a) ** 2 + (np.sin(s) / b) ** 2)
 
     def _nodules(self, s, theta):
         if self.W_1 == 0 or self.W_2 == 0 or self.N == 0:
-            return 0
+            return np.zeros_like(s)
         else:
-            l_theta = 2 * np.pi / self.N * (self.N * theta / (2 * np.pi) - int(self.N * theta / 2 * np.pi))
+            l_theta = 2 * np.pi / self.N * (self.N * theta / (2 * np.pi) - np.round(self.N * theta / 2 * np.pi))
             return self.L * np.exp(-((2 * (s - self.P) / self.W_1) ** 2 + (2 * l_theta / self.W_2) ** 2))
 
 

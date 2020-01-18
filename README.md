@@ -1,5 +1,7 @@
 # Shellz [Work in progress]
 
+![](imgs/Shellz.png)
+
 A Blender addon for parametric seashell models. Currently not in a working state.
 
 ## Todo:
