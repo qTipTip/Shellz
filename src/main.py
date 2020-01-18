@@ -29,19 +29,21 @@ class AddShell(bpy.types.Operator):
     bl_label = "Adds a shell-object to the viewport"
     bl_options = {'REGISTER', 'UNDO'}
 
-    thetaValues: bpy.props.FloatVectorProperty(
-        name="Theta min max steps",
-        default=[0, 2 * np.pi, 40]
+    thetaMin: bpy.props.FloatProperty(
+        name="min(theta)",
+        default=0.0
     )
-
-    sValues: bpy.props.FloatVectorProperty(
-        name="S min max steps",
-        default=[0, 2 * np.pi, 40]
+    thetaMax: bpy.props.FloatProperty(
+        name="max(theta)",
+        default=2 * np.pi
     )
-
-    generatingCurve: bpy.props.FloatVectorProperty(
-        name="a b",
-        default=[1, 1, 0]
+    thetaResolution: bpy.props.IntProperty(
+        name="n_theta",
+        default=40
+    )
+    sResolution: bpy.props.IntProperty(
+        name="n_s",
+        default=40
     )
 
     alpha: bpy.props.FloatProperty(
@@ -60,11 +62,11 @@ class AddShell(bpy.types.Operator):
         """
 
         H = HelicoSpiral(alpha=self.alpha)
-        C = Ellipse(self.generatingCurve[0], self.generatingCurve[1], alpha=self.alpha)
+        C = Ellipse(a=1, b=1, alpha=self.alpha)
         S = Shell(H, C)
 
-        theta = np.linspace(*self.thetaValues)
-        s = np.linspace(self.sValues[0], self.sValues[1], self.sValues[2])
+        theta = np.linspace(self.thetaMin, self.thetaMax, self.thetaResolution)
+        s = np.linspace(0, 2 * np.pi, self.sResolution)
         xyz = S(theta, s)
         vertices, faces = create_mesh(xyz)
 
