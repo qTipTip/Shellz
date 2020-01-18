@@ -86,6 +86,15 @@ class AddShell(bpy.types.Operator):
         default=0
     )
 
+    a: bpy.props.FloatProperty(
+        name="a",
+        default=1,
+    )
+    b: bpy.props.FloatProperty(
+        name="b",
+        default=1
+    )
+
     # Properties: Nodules
     N: bpy.props.IntProperty(
         name="N",
@@ -120,7 +129,7 @@ class AddShell(bpy.types.Operator):
         """
 
         H = HelicoSpiral(alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta), A=self.A)
-        C = Ellipse(a=1, b=1, A=self.A, alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta),
+        C = Ellipse(a=self.a, b=self.b, A=self.A, alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta),
                     omega=np.deg2rad(self.omega), phi=np.deg2rad(self.phi),
                     mu=np.deg2rad(self.mu), L=self.L, P=np.deg2rad(self.P), N=self.N, W_1=self.W_1, W_2=self.W_2)
         S = Shell(H, C)
@@ -259,8 +268,8 @@ class Ellipse(GeneratingCurve):
         z = sin_s * r * np.exp(theta * cot)
 
         # Adding rotation in the mu-plane
-        x = x - (z * np.sin(self.mu)) * sin_theta
-        y = y + (z * np.sin(self.mu)) * cos_theta
+        x = x - (z.copy() * np.sin(self.mu)) * sin_theta
+        y = y + (z.copy() * np.sin(self.mu)) * cos_theta
         z = (-self.A * np.cos(self.beta) + np.cos(self.mu) * sin_s * r) * np.exp(theta * cot)
 
         return np.stack([x, y, z])
