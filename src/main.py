@@ -2,6 +2,8 @@ import bpy
 import bmesh
 import numpy as np
 
+from mathutils import Vector
+
 bl_info = {
     "name": "Shellz",
     "blender": (2, 80, 0),
@@ -35,7 +37,7 @@ class AddShell(bpy.types.Operator):
     )
     thetaMax: bpy.props.FloatProperty(
         name="max(theta)",
-        default=2 * np.pi
+        default=360
     )
     thetaResolution: bpy.props.IntProperty(
         name="n_theta",
@@ -51,6 +53,16 @@ class AddShell(bpy.types.Operator):
         min=0,
         max=180,
     )
+    beta: bpy.props.FloatProperty(
+        name="beta",
+        default=30,
+        min=0,
+        max=180
+    )
+    A: bpy.props.FloatProperty(
+        name="A",
+        default=1
+    )
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
@@ -60,11 +72,11 @@ class AddShell(bpy.types.Operator):
         This is run upon calling the operator
         """
 
-        H = HelicoSpiral(alpha=self.alpha)
-        C = Ellipse(a=1, b=1, alpha=self.alpha)
+        H = HelicoSpiral(alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta), A=self.A)
+        C = Ellipse(a=1, b=1, alpha=np.deg2rad(self.alpha))
         S = Shell(H, C)
 
-        theta = np.linspace(self.thetaMin, self.thetaMax, self.thetaResolution)
+        theta = np.linspace(np.deg2rad(self.thetaMin), np.deg2rad(self.thetaMax), self.thetaResolution)
         s = np.linspace(0, 2 * np.pi, self.sResolution)
         xyz = S(theta, s)
         vertices, faces = create_mesh(xyz)
@@ -117,6 +129,25 @@ def blender_import(context: bpy.context, vertices, faces):
     bpy.context.collection.objects.link(blender_object)
     mesh.from_pydata(vertices, [], faces)
     # mesh.update(calc_edges=True)
+
+    normalize_object_size(blender_object)
+
+
+def normalize_object_size(blender_object):
+    # Eventually apply transforms (comment if unwanted)
+    bpy.ops.object.transform_apply(rotation=True, scale=True)
+    minX = min([vertex.co[0] for vertex in blender_object.data.vertices])
+    minY = min([vertex.co[1] for vertex in blender_object.data.vertices])
+    minZ = min([vertex.co[2] for vertex in blender_object.data.vertices])
+    vMin = Vector([minX, minY, minZ])
+    maxDim = max(blender_object.dimensions)
+    if maxDim != 0:
+        for v in blender_object.data.vertices:
+            v.co -= vMin  # Set all coordinates start from (0, 0, 0)
+            v.co /= maxDim  # Set all coordinates between 0 and 1
+    else:
+        for v in blender_object.data.vertices:
+            v.co -= vMin
 
 
 class GeneratingCurve(object):
