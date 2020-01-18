@@ -31,14 +31,7 @@ class AddShell(bpy.types.Operator):
     bl_label = "Adds a shell-object to the viewport"
     bl_options = {'REGISTER', 'UNDO'}
 
-    thetaMin: bpy.props.FloatProperty(
-        name="min(theta)",
-        default=0.0
-    )
-    thetaMax: bpy.props.FloatProperty(
-        name="max(theta)",
-        default=360
-    )
+    # Properties: General
     resolution: bpy.props.IntProperty(
         name="resolution",
         default=40
@@ -48,6 +41,17 @@ class AddShell(bpy.types.Operator):
         default=30,
         min=0,
         max=180,
+    )
+
+    # Properties: Helico Spiral
+    thetaMin: bpy.props.FloatProperty(
+        name="min(theta)",
+        default=0.0,
+        min=0
+    )
+    thetaMax: bpy.props.FloatProperty(
+        name="max(theta)",
+        default=360
     )
     beta: bpy.props.FloatProperty(
         name="beta",
@@ -60,6 +64,20 @@ class AddShell(bpy.types.Operator):
         default=1
     )
 
+    # Properties: Generating Curve
+    omega: bpy.props.FloatProperty(
+        name="omega",
+        default=0
+    )
+    phi: bpy.props.FloatProperty(
+        name="phi",
+        default=0
+    )
+    mu: bpy.props.FloatProperty(
+        name="mu",
+        default=0
+    )
+
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
 
@@ -69,7 +87,9 @@ class AddShell(bpy.types.Operator):
         """
 
         H = HelicoSpiral(alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta), A=self.A)
-        C = Ellipse(a=1, b=1, alpha=np.deg2rad(self.alpha))
+        C = Ellipse(a=1, b=1, A=self.A, alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta),
+                    omega=np.deg2rad(self.omega), phi=np.deg2rad(self.phi),
+                    mu=np.deg2rad(self.mu))
         S = Shell(H, C)
 
         theta = np.linspace(np.deg2rad(self.thetaMin), np.deg2rad(self.thetaMax), self.resolution)
@@ -156,7 +176,7 @@ def cot(alpha):
 
 class Ellipse(GeneratingCurve):
 
-    def __init__(self, a=1, b=1, alpha=30):
+    def __init__(self, a=1, b=1, A=1, alpha=30, beta=30, omega=0, phi=0, mu=0):
         """
         Initializes an elliptical generating curve with semi-axes a and b.
 
@@ -166,7 +186,12 @@ class Ellipse(GeneratingCurve):
 
         self.a = a
         self.b = b
+        self.A = A
         self.alpha = alpha
+        self.beta = beta
+        self.omega = omega
+        self.phi = phi
+        self.mu = mu
 
     def __call__(self, theta, s):
         """
@@ -183,19 +208,21 @@ class Ellipse(GeneratingCurve):
         r = self._radius(s)
         theta = np.array(theta)
 
-        n = r.shape[0]
-        m = theta.shape[0]
+        cos_s = np.cos(s + self.phi)
+        sin_s = np.sin(s + self.phi)
 
-        cos_s = np.cos(s)
-        sin_s = np.sin(s)
-
-        cos_theta = np.cos(theta)
-        sin_theta = np.sin(theta)
+        cos_theta = np.cos(theta + self.omega)
+        sin_theta = np.sin(theta + self.omega)
         cot = cotan(self.alpha)
 
         x = cos_s * cos_theta * r * np.exp(theta * cot)
         y = cos_s * sin_theta * r * np.exp(theta * cot)
         z = sin_s * r * np.exp(theta * cot)
+
+        # Adding rotation in the mu-plane
+        x = x - (z * np.sin(self.mu)) * sin_theta
+        y = y + (z * np.sin(self.mu)) * cos_theta
+        z = (-self.A * np.cos(self.beta) + np.cos(self.mu) * sin_s * r) * np.exp(theta * cot)
 
         return np.stack([x, y, z])
 
