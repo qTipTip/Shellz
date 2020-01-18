@@ -114,7 +114,7 @@ class AddShell(bpy.types.Operator):
         H = HelicoSpiral(alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta), A=self.A)
         C = Ellipse(a=1, b=1, A=self.A, alpha=np.deg2rad(self.alpha), beta=np.deg2rad(self.beta),
                     omega=np.deg2rad(self.omega), phi=np.deg2rad(self.phi),
-                    mu=np.deg2rad(self.mu))
+                    mu=np.deg2rad(self.mu), L=self.L, P=self.P, N=self.N, W_1=self.W_1, W_2=self.W_2)
         S = Shell(H, C)
 
         theta = np.linspace(np.deg2rad(self.thetaMin), np.deg2rad(self.thetaMax), self.resolution)
