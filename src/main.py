@@ -253,7 +253,6 @@ class Ellipse(GeneratingCurve):
         theta, s = np.meshgrid(theta, s)
 
         r = self._radius(s) + self._nodules(s, theta)
-        print(self._radius(s).shape, self._nodules(s, theta).shape)
         theta = np.array(theta)
 
         cos_s = np.cos(s + self.phi)
