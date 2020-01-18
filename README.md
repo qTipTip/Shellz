@@ -2,7 +2,7 @@
 
 ![](imgs/Shellz.png)
 
-A Blender addon for parametric seashell models. Currently not in a working state.
+A Blender addon for parametric seashell models. Currently in a semi-working state.
 
 ## Todo:
 
