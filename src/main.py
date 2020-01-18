@@ -45,7 +45,6 @@ class AddShell(bpy.types.Operator):
         name="n_s",
         default=40
     )
-
     alpha: bpy.props.FloatProperty(
         name="alpha",
         default=30,
