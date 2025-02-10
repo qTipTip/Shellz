@@ -1,4 +1,4 @@
-# Shellz [Work in progress]
+# Shellz
 
 ![](imgs/Shellz.png)
 
