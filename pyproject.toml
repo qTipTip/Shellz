@@ -1,0 +1,17 @@
+[project]
+name = "shellz"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+authors = [
+    { name = "Ivar Stangeby", email = "istangeby+shellz@gmail.com" }
+]
+keywords = ["blender", "addon", "seashell", "parametric", "3d-modeling"]
+dependencies = [
+    "numpy>=2.3.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
