@@ -1,8 +1,6 @@
 import bpy
-
-import numpy as np
-import PIL.Image
 from mathutils import Vector
+import numpy as np
 
 bl_info = {
     "name": "Shellz",
@@ -208,16 +206,12 @@ def normalize_object_size(blender_object):
             v.co -= vMin
 
 
-class GeneratingCurve(object):
-    pass
-
 
 def cot(alpha):
     return 1 / np.tan(alpha)
 
 
-class Ellipse(GeneratingCurve):
-
+class Ellipse:
     def __init__(self, a=1, b=1, A=1, alpha=30, beta=30, omega=0, phi=0, mu=0, L=0, N=0, W_1=0, W_2=0, P=0):
         """
         Initializes an elliptical generating curve with semi-axes a and b.
@@ -291,7 +285,7 @@ class Ellipse(GeneratingCurve):
 
 class Shell(object):
 
-    def __init__(self, helico_spiral, generating_curve):
+    def __init__(self, helico_spiral: "HelicoSpiral", generating_curve: Ellipse):
         """
         Initialize a shell by specifying the generating curve and the helico spiral.
 
@@ -340,47 +334,3 @@ class HelicoSpiral(object):
         h[2] = -np.cos(beta) * np.exp(theta * cot)
 
         return A * h
-
-
-def generate_texture(rho, kappa, mu, rho_0, sigma, nu, D_a, D_s, N, M):
-    t_values, dt = np.linspace(0, 1, N, retstep=True)
-    x_values, dx = np.linspace(0, 1, M, retstep=True)
-
-    s = np.zeros((N, M))
-    a = np.zeros((N, M))
-
-    rho_array = np.random.normal(rho, scale=0.025, size=(N, M))
-    s[0] = np.zeros(M)
-    a[0] = np.zeros(M)
-
-    def rhs(a_prev, s_prev):
-        da_ddx = np.gradient(np.gradient(a_prev))
-        ds_ddx = np.gradient(np.gradient(s_prev))
-
-        da_dt = rho * s_prev * (a_prev ** 2 / (1 + kappa * a_prev ** 2) + rho_0) - mu * a_prev + D_a * da_ddx
-        ds_dt = sigma - rho * s_prev * (a_prev ** 2 / (1 + kappa * a_prev ** 2) + rho_0) - nu * s_prev + D_s * ds_ddx
-
-        return da_dt, ds_dt
-
-    for i in range(0, N - 1):
-        rho = rho_array[i]
-        da_dt, ds_dt = rhs(a[i], s[i])
-
-        a[i + 1] = a[i] + dt * da_dt
-        s[i + 1] = s[i] + dt * ds_dt
-
-    return a / np.max(a, axis=(0, 1))
-
-
-if __name__ == '__main__':
-    register()
-
-    texture_map = generate_texture(rho=0.1, rho_0=0.005, mu=0.1, D_a=0.004, sigma=0.012, nu=0, D_s=0.0, kappa=1,
-                                   N=100,
-                                   M=100)
-    import matplotlib.pyplot as plt
-
-    plt.imshow(texture_map)
-    map = np.uint8(texture_map * 255)
-    img = PIL.Image.fromarray(map)
-    img.save('test.png')
