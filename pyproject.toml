@@ -10,3 +10,8 @@ keywords = ["blender", "addon", "seashell", "parametric", "3d-modeling"]
 dependencies = [
     "numpy>=2.3.1",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
